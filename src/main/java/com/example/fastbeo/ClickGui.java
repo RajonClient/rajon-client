@@ -166,7 +166,7 @@ public class ClickGui extends GuiScreen {
                     drawRect(x, r.y, x + W, r.y + H, hover ? 0xFF2C2C2C : 0xFF222222);
                     if (s.toggle) {
                         if (s.on()) drawRect(x, r.y, x + W, r.y + H, 0xFF1F4D22);
-                    } else {
+                    } else if (s.options == null) {
                         int fill = (int) (W * (s.value - s.min) / (s.max - s.min));
                         drawRect(x, r.y, x + fill, r.y + H, 0xFF2B5F78);
                     }
@@ -239,6 +239,8 @@ public class ClickGui extends GuiScreen {
                     listening = -1;
                     if (r.setting.toggle) {
                         Settings.set(r.setting, r.setting.on() ? 0 : 1);
+                    } else if (r.setting.options != null) {
+                        Settings.set(r.setting, (r.setting.value + 1) % r.setting.options.length);
                     } else {
                         sliding = r.setting;
                         slideX = x;

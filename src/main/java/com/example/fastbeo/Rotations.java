@@ -13,8 +13,13 @@ public class Rotations {
 
     /** {yaw, pitch} needed to look from the player's eyes at a point in the world. */
     public static float[] anglesTo(double x, double y, double z) {
+        return anglesTo(x, y, z, 1.0F);
+    }
+
+    /** Same, but uses the smoothed (between ticks) eye position for the given partial tick. */
+    public static float[] anglesTo(double x, double y, double z, float partialTicks) {
         EntityPlayerSP p = Minecraft.getMinecraft().thePlayer;
-        Vec3 eye = p.getPositionEyes(1.0F);
+        Vec3 eye = p.getPositionEyes(partialTicks);
         double dx = x - eye.xCoord;
         double dy = y - eye.yCoord;
         double dz = z - eye.zCoord;
@@ -48,13 +53,58 @@ public class Rotations {
         p.prevRotationPitch += applied;
     }
 
+    // ---- Tracked rotation (used by Scaffold) ----
+    // How far Scaffold has turned the view away from where your mouse had it.
+    // MovementFix uses this to keep your walking direction and to hand the view back.
+    public static float offsetYaw = 0f;
+    public static float offsetPitch = 0f;
+    public static int lastUsed = -1000; // player tick of the last tracked turn
+
+    /** Like turn(), but remembers how much the view was moved. */
+    public static void turnTracked(float yawStep, float pitchStep) {
+        EntityPlayerSP p = Minecraft.getMinecraft().thePlayer;
+        float pitchBefore = p.rotationPitch;
+        turn(yawStep, pitchStep);
+        offsetYaw += yawStep;
+        offsetPitch += p.rotationPitch - pitchBefore;
+        lastUsed = p.ticksExisted;
+    }
+
+    /** Smoothly turns the view back toward where the mouse had it. */
+    public static void release(float maxStep) {
+        if (offsetYaw == 0f && offsetPitch == 0f) return;
+        EntityPlayerSP p = Minecraft.getMinecraft().thePlayer;
+
+        offsetYaw = MathHelper.wrapAngleTo180_float(offsetYaw);
+        float yawStep = limit(-offsetYaw, maxStep);
+        float pitchStep = limit(-offsetPitch, maxStep);
+
+        float pitchBefore = p.rotationPitch;
+        turn(yawStep, pitchStep);
+        offsetYaw += yawStep;
+        offsetPitch += p.rotationPitch - pitchBefore;
+
+        if (Math.abs(offsetYaw) < 0.01f) offsetYaw = 0f;
+        if (Math.abs(offsetPitch) < 0.01f) offsetPitch = 0f;
+    }
+
+    public static void clearOffsets() {
+        offsetYaw = 0f;
+        offsetPitch = 0f;
+    }
+
     private static float limit(float v, float max) {
         return Math.max(-max, Math.min(max, v));
+    }
+
+    /** Turns toward fixed yaw/pitch angles, at most maxStep degrees on each axis. */
+    public static void turnTo(float yaw, float pitch, float maxStep) {
+        turnTracked(limit(yawDiff(yaw), maxStep), limit(pitchDiff(pitch), maxStep));
     }
 
     /** Turns toward a point, at most maxStep degrees on each axis. */
     public static void lookAt(Vec3 point, float maxStep) {
         float[] a = anglesTo(point.xCoord, point.yCoord, point.zCoord);
-        turn(limit(yawDiff(a[0]), maxStep), limit(pitchDiff(a[1]), maxStep));
+        turnTracked(limit(yawDiff(a[0]), maxStep), limit(pitchDiff(a[1]), maxStep));
     }
 }

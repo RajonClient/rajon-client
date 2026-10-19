@@ -9,7 +9,7 @@ public class Modules {
         "Reach", "Scaffold", "FastPlace", "LegitScaffold",
         "AutoClicker", "ClickDelay", "Allow Multiplayer", "HUD", "ArrayList",
         "AutoSprint", "Fullbright", "ESP",
-        "AimAssist", "Rotations", "NoHurtCam"
+        "AimAssist", "Rotations", "NoHurtCam", "TriggerBot", "Freelook", "Animations"
     };
 
     // Panels shown in the ClickGUI, in this order
@@ -31,7 +31,10 @@ public class Modules {
         3, // ESP
         0, // AimAssist
         2, // Rotations
-        3  // NoHurtCam
+        3, // NoHurtCam
+        0, // TriggerBot
+        3, // Freelook
+        3  // Animations
     };
 
     // Short description of each module, shown when you hover it in the ClickGUI
@@ -50,7 +53,10 @@ public class Modules {
         "Draws boxes around players, visible through walls.",
         "Gently turns your camera toward the closest target in view.",
         "Scaffold turns your camera toward the block it places.",
-        "Removes the camera shake when you take damage."
+        "Removes the camera shake when you take damage.",
+        "Attacks automatically while your crosshair is on a target.",
+        "Look around freely while your character keeps facing the same way.",
+        "Block animations and item position/size in first person."
     };
 
     public static boolean isOn(int i) {
@@ -70,6 +76,9 @@ public class Modules {
             case 12: return FarReach.aimAssist.enabled;
             case 13: return FarReach.rotationsEnabled;
             case 14: return FarReach.noHurtCam.enabled;
+            case 15: return FarReach.triggerBot.enabled;
+            case 16: return FarReach.freelook.enabled;
+            case 17: return FarReach.animations.enabled;
             default: return false;
         }
     }
@@ -91,6 +100,9 @@ public class Modules {
             case 12: FarReach.aimAssist.enabled = v; break;
             case 13: FarReach.rotationsEnabled = v; break;
             case 14: FarReach.noHurtCam.enabled = v; break;
+            case 15: FarReach.triggerBot.enabled = v; break;
+            case 16: FarReach.freelook.enabled = v; break;
+            case 17: FarReach.animations.enabled = v; break;
             default: break;
         }
         ConfigManager.autoSave();
@@ -105,8 +117,8 @@ public class Modules {
         if (i < 0 || i >= NAMES.length) return;
         Minecraft mc = Minecraft.getMinecraft();
 
-        // Allow Multiplayer, HUD, ArrayList, Fullbright and NoHurtCam (visual only) and Rotations (a flag) are never locked
-        if (i == 6 || i == 7 || i == 8 || i == 10 || i == 13 || i == 14) {
+        // Allow Multiplayer, HUD, ArrayList, Fullbright, NoHurtCam, Freelook and Animations (visual only) and Rotations (a flag) are never locked
+        if (i == 6 || i == 7 || i == 8 || i == 10 || i == 13 || i == 14 || i == 16 || i == 17) {
             set(i, !isOn(i));
             msg(NAMES[i] + ": " + onOff(isOn(i))
                     + (i == 6 && isOn(i) ? " (only use where hacked clients are allowed)" : ""));
@@ -123,6 +135,27 @@ public class Modules {
         set(i, !isOn(i));
         msg(NAMES[i] + ": " + onOff(isOn(i)));
         Notifications.add(NAMES[i], onOff(isOn(i)), isOn(i));
+    }
+
+    /** Short extra info shown after the module name in the ArrayList (null = none). */
+    public static String tag(int i) {
+        switch (i) {
+            case 0: return String.format("%.2f", Settings.get("Reach", "Distance"));
+            case 1: return Settings.display("Scaffold", "Mode");
+            case 4: return cps("AutoClicker");
+            case 11: return "Box";
+            case 12: return "Smooth " + Settings.display("AimAssist", "Smoothness");
+            case 13: return Settings.display("Rotations", "Mode");
+            case 15: return cps("TriggerBot");
+            case 17: return Settings.display("Animations", "Style");
+            default: return null;
+        }
+    }
+
+    private static String cps(String module) {
+        int a = (int) Settings.get(module, "Min CPS");
+        int b = (int) Settings.get(module, "Max CPS");
+        return Math.min(a, b) + "-" + Math.max(a, b);
     }
 
     private static String onOff(boolean b) {

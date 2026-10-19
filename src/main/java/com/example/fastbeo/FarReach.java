@@ -39,6 +39,9 @@ public class FarReach {
     public static AimAssist aimAssist;
     public static boolean rotationsEnabled = false;
     public static NoHurtCam noHurtCam;
+    public static TriggerBot triggerBot;
+    public static Freelook freelook;
+    public static Animations animations;
 
     public static boolean canRun() {
         return Minecraft.getMinecraft().isSingleplayer() || allowMultiplayer;
@@ -75,6 +78,19 @@ public class FarReach {
 
         noHurtCam = new NoHurtCam();
         FMLCommonHandler.instance().bus().register(noHurtCam);
+
+        MovementFix movementFix = new MovementFix();
+        MinecraftForge.EVENT_BUS.register(movementFix);
+        FMLCommonHandler.instance().bus().register(movementFix);
+
+        animations = new Animations();
+        MinecraftForge.EVENT_BUS.register(animations);
+
+        freelook = new Freelook();
+        FMLCommonHandler.instance().bus().register(freelook);
+
+        triggerBot = new TriggerBot();
+        FMLCommonHandler.instance().bus().register(triggerBot);
 
         aimAssist = new AimAssist();
         FMLCommonHandler.instance().bus().register(aimAssist);

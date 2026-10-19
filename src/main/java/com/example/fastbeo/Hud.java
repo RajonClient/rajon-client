@@ -78,11 +78,8 @@ public class Hud {
                 return new int[] { 110, 34 };
             case HudLayout.TARGET:
                 return new int[] { 150, 40 };
-            case HudLayout.ARRAYLIST: {
-                List<String> names = arrayEntries();
-                if (names.isEmpty()) return new int[] { 70, 24 };
-                return new int[] { fr.getStringWidth(names.get(0)) + 10, names.size() * 12 };
-            }
+            case HudLayout.ARRAYLIST:
+                return ArrayListRenderer.size();
             default:
                 return new int[] { 130, 24 };
         }
@@ -99,23 +96,6 @@ public class Hud {
             if (info != null) ping = info.getResponseTime();
         }
         return "  |  " + user + "  |  " + server + "  |  " + ping + "ms";
-    }
-
-    // Enabled modules, longest name first
-    private static List<String> arrayEntries() {
-        final FontRenderer fr = Minecraft.getMinecraft().fontRendererObj;
-        List<String> names = new ArrayList<String>();
-        for (int i = 0; i < Modules.NAMES.length; i++) {
-            // Skip Allow Multiplayer, HUD and ArrayList themselves
-            if (i == 6 || i == 7 || i == 8) continue;
-            if (Modules.isOn(i)) names.add(Modules.NAMES[i]);
-        }
-        Collections.sort(names, new Comparator<String>() {
-            public int compare(String a, String b) {
-                return fr.getStringWidth(b) - fr.getStringWidth(a);
-            }
-        });
-        return names;
     }
 
     // ---------------------------------------------------------------- watermark
@@ -252,29 +232,7 @@ public class Hud {
 
     private void drawArrayList(ScaledResolution sr) {
         if (!FarReach.arrayListEnabled) return;
-
-        List<String> names = arrayEntries();
-        if (names.isEmpty()) return;
-
-        FontRenderer fr = mc.fontRendererObj;
-        int[] s = size(HudLayout.ARRAYLIST);
-        int left = HudLayout.left(HudLayout.ARRAYLIST, s[0], sr);
-        int top = HudLayout.top(HudLayout.ARRAYLIST, s[1], sr);
-        int right = left + s[0];
-        long t = System.currentTimeMillis();
-
-        for (int i = 0; i < names.size(); i++) {
-            String n = names.get(i);
-            int tw = fr.getStringWidth(n);
-            int y = top + i * 12;
-
-            float hue = ((t / 20 + i * 12) % 360) / 360f;
-            int color = Settings.bool("ArrayList", "Rainbow") ? Color.HSBtoRGB(hue, 0.55f, 1f) : ACCENT;
-
-            Gui.drawRect(right - tw - 10, y, right - 2, y + 12, 0x90101010);
-            Gui.drawRect(right - 2, y, right, y + 12, color);
-            fr.drawStringWithShadow(n, right - 6 - tw, y + 2, color);
-        }
+        ArrayListRenderer.draw(sr);
     }
 
     // ---------------------------------------------------------------- notifications

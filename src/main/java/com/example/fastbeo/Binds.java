@@ -17,10 +17,10 @@ import org.lwjgl.input.Keyboard;
  */
 public class Binds {
     // Same order as Modules.NAMES: Reach, Scaffold, FastPlace, LegitScaffold,
-    // AutoClicker, ClickDelay, Allow Multiplayer, HUD, ArrayList, AutoSprint, Fullbright, ESP, AimAssist, Rotations, NoHurtCam (0 = not bound)
+    // AutoClicker, ClickDelay, Allow Multiplayer, HUD, ArrayList, AutoSprint, Fullbright, ESP, AimAssist, Rotations, NoHurtCam, TriggerBot, Freelook, Animations (0 = not bound)
     private static final int[] DEFAULTS = {
         Keyboard.KEY_Y, Keyboard.KEY_G, Keyboard.KEY_H, Keyboard.KEY_J,
-        Keyboard.KEY_K, Keyboard.KEY_N, 0, 0, 0, 0, 0, 0, 0, 0, 0
+        Keyboard.KEY_K, Keyboard.KEY_N, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
     };
 
     private static final int[] keys = new int[Modules.NAMES.length];
