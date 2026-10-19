@@ -42,6 +42,9 @@ public class FarReach {
     public static TriggerBot triggerBot;
     public static Freelook freelook;
     public static Animations animations;
+    public static KillAura killAura;
+    public static TargetEsp targetEsp;
+    public static AutoTool autoTool;
 
     public static boolean canRun() {
         return Minecraft.getMinecraft().isSingleplayer() || allowMultiplayer;
@@ -82,6 +85,19 @@ public class FarReach {
         MovementFix movementFix = new MovementFix();
         MinecraftForge.EVENT_BUS.register(movementFix);
         FMLCommonHandler.instance().bus().register(movementFix);
+
+        autoTool = new AutoTool();
+        FMLCommonHandler.instance().bus().register(autoTool);
+
+        targetEsp = new TargetEsp();
+        MinecraftForge.EVENT_BUS.register(targetEsp);
+
+        killAura = new KillAura();
+        FMLCommonHandler.instance().bus().register(killAura);
+
+        // Silent rotations: its connect/disconnect events are posted on the FML bus,
+        // it must exist before KillAura and Scaffold start calling SilentRotations.aim()
+        FMLCommonHandler.instance().bus().register(new SilentRotations());
 
         animations = new Animations();
         MinecraftForge.EVENT_BUS.register(animations);

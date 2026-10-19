@@ -9,7 +9,7 @@ public class Modules {
         "Reach", "Scaffold", "FastPlace", "LegitScaffold",
         "AutoClicker", "ClickDelay", "Allow Multiplayer", "HUD", "ArrayList",
         "AutoSprint", "Fullbright", "ESP",
-        "AimAssist", "Rotations", "NoHurtCam", "TriggerBot", "Freelook", "Animations"
+        "AimAssist", "Rotations", "NoHurtCam", "TriggerBot", "Freelook", "Animations", "KillAura", "TargetESP", "AutoTool"
     };
 
     // Panels shown in the ClickGUI, in this order
@@ -34,7 +34,10 @@ public class Modules {
         3, // NoHurtCam
         0, // TriggerBot
         3, // Freelook
-        3  // Animations
+        3, // Animations
+        0, // KillAura
+        3, // TargetESP
+        2  // AutoTool
     };
 
     // Short description of each module, shown when you hover it in the ClickGUI
@@ -52,11 +55,14 @@ public class Modules {
         "Makes everything fully lit.",
         "Draws boxes around players, visible through walls.",
         "Gently turns your camera toward the closest target in view.",
-        "Scaffold turns your camera toward the block it places.",
+        "Scaffold turns toward the block it places (silent: only the server sees it).",
         "Removes the camera shake when you take damage.",
         "Attacks automatically while your crosshair is on a target.",
         "Look around freely while your character keeps facing the same way.",
-        "Block animations and item position/size in first person."
+        "Block animations and item position/size in first person.",
+        "Attacks targets around you automatically, can rotate silently.",
+        "Marks the target you are fighting with a ring, box or circle.",
+        "Switches to the fastest tool for the block you mine."
     };
 
     public static boolean isOn(int i) {
@@ -79,6 +85,9 @@ public class Modules {
             case 15: return FarReach.triggerBot.enabled;
             case 16: return FarReach.freelook.enabled;
             case 17: return FarReach.animations.enabled;
+            case 18: return FarReach.killAura.enabled;
+            case 19: return FarReach.targetEsp.enabled;
+            case 20: return FarReach.autoTool.enabled;
             default: return false;
         }
     }
@@ -103,6 +112,9 @@ public class Modules {
             case 15: FarReach.triggerBot.enabled = v; break;
             case 16: FarReach.freelook.enabled = v; break;
             case 17: FarReach.animations.enabled = v; break;
+            case 18: FarReach.killAura.enabled = v; break;
+            case 19: FarReach.targetEsp.enabled = v; break;
+            case 20: FarReach.autoTool.enabled = v; break;
             default: break;
         }
         ConfigManager.autoSave();
@@ -117,8 +129,8 @@ public class Modules {
         if (i < 0 || i >= NAMES.length) return;
         Minecraft mc = Minecraft.getMinecraft();
 
-        // Allow Multiplayer, HUD, ArrayList, Fullbright, NoHurtCam, Freelook and Animations (visual only) and Rotations (a flag) are never locked
-        if (i == 6 || i == 7 || i == 8 || i == 10 || i == 13 || i == 14 || i == 16 || i == 17) {
+        // Allow Multiplayer, HUD, ArrayList, Fullbright, NoHurtCam, Freelook, Animations and TargetESP (visual only) and Rotations (a flag) are never locked
+        if (i == 6 || i == 7 || i == 8 || i == 10 || i == 13 || i == 14 || i == 16 || i == 17 || i == 19) {
             set(i, !isOn(i));
             msg(NAMES[i] + ": " + onOff(isOn(i))
                     + (i == 6 && isOn(i) ? " (only use where hacked clients are allowed)" : ""));
@@ -145,9 +157,13 @@ public class Modules {
             case 4: return cps("AutoClicker");
             case 11: return "Box";
             case 12: return "Smooth " + Settings.display("AimAssist", "Smoothness");
-            case 13: return Settings.display("Rotations", "Mode");
+            case 13: return Settings.display("Rotations", "Mode")
+                    + (Settings.bool("Rotations", "Silent") ? " Silent" : "");
             case 15: return cps("TriggerBot");
             case 17: return Settings.display("Animations", "Style");
+            case 18: return String.format("%.1f", Settings.get("KillAura", "Range"))
+                    + (Settings.bool("KillAura", "Rotate") && Settings.bool("KillAura", "Silent") ? " Silent" : "");
+            case 19: return Settings.display("TargetESP", "Mode");
             default: return null;
         }
     }

@@ -121,7 +121,8 @@ public class Settings {
         toggle(12, "Visible only", true);
 
         choice(13, "Mode", 0, "Face block", "Backwards");   // Rotations (scaffold)
-        slider(13, "Speed", 10, 180, 5, 90);
+        toggle(13, "Silent", true);                         // send the rotation to the server only, camera stays
+        slider(13, "Speed", 10, 180, 5, 90);                // max degrees per tick (maxStep of SilentRotations.aim)
         slider(13, "Pitch", 30, 90, 1, 80);                 // used by Backwards
         toggle(13, "Movement fix", true);                   // keeps your walking direction
 
@@ -140,6 +141,29 @@ public class Settings {
         slider(17, "Scale", 0.5, 1.5, 0.05, 1);
         slider(17, "Duration", 100, 600, 50, 300);          // ms, length of the block motion
         toggle(17, "Loop", false);                          // repeat the block motion while blocking
+
+        slider(18, "Range", 2, 6, 0.1, 4.0);                // KillAura
+        slider(18, "Min CPS", 1, 20, 1, 8);
+        slider(18, "Max CPS", 1, 20, 1, 12);
+        choice(18, "Mode", 0, "Single", "Switch");
+        choice(18, "Priority", 0, "Distance", "Health", "Angle");
+        slider(18, "FOV", 30, 360, 10, 360);
+        toggle(18, "Players only", true);
+        toggle(18, "Visible only", true);
+        toggle(18, "Require weapon", false);
+        toggle(18, "Swing", true);
+        toggle(18, "Rotate", true);
+        toggle(18, "Silent", true);                         // on = server-side rotation only, off = turns your camera
+        slider(18, "Rotation speed", 5, 180, 5, 180);       // max degrees per tick (maxStep of SilentRotations.aim)
+        choice(18, "AutoBlock", 0, "Off", "Fake");          // Fake = block pose on your screen only
+
+        choice(19, "Mode", 0, "Ring", "Box", "Circle");     // TargetESP
+        choice(19, "Color", 0, "Health", "Theme", "White");
+        slider(19, "Duration", 1, 10, 1, 3);               // seconds after the last hit
+        slider(19, "Speed", 0.5, 3, 0.1, 1);
+        toggle(19, "Players only", false);
+
+        toggle(20, "Switch back", true);                    // AutoTool
     }
 
     public static List<Setting> all() {

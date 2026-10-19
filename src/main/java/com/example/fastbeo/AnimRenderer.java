@@ -2,6 +2,7 @@ package com.example.fastbeo;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.EntityPlayerSP;
+import net.minecraft.client.renderer.EntityRenderer;
 import net.minecraft.client.renderer.GlStateManager;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.OpenGlHelper;
@@ -9,7 +10,9 @@ import net.minecraft.client.renderer.RenderHelper;
 import net.minecraft.client.renderer.block.model.ItemCameraTransforms;
 import net.minecraft.item.EnumAction;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemSword;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.MathHelper;
 import net.minecraftforge.fml.relauncher.ReflectionHelper;
 
@@ -22,6 +25,34 @@ import net.minecraftforge.fml.relauncher.ReflectionHelper;
 public class AnimRenderer extends ItemRenderer {
     private final Minecraft mc;
 
+    private static boolean installed = false;
+    private static boolean failed = false;
+
+    /** Swaps the game's first-person item renderer for ours (it passes everything else through). */
+    public static void install() {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (installed || failed || mc.entityRenderer == null) return;
+        try {
+            AnimRenderer renderer = new AnimRenderer(mc);
+            ReflectionHelper.setPrivateValue(EntityRenderer.class, mc.entityRenderer, renderer,
+                    "itemRenderer", "field_78516_c");
+            installed = true;
+            try {
+                // The game keeps a second reference to the same renderer
+                ReflectionHelper.setPrivateValue(Minecraft.class, mc, renderer,
+                        "itemRenderer", "field_175620_Y");
+            } catch (Exception ignored) {
+                // Only matters for a tiny equip animation glitch
+            }
+        } catch (Exception ex) {
+            failed = true;
+            if (mc.thePlayer != null) {
+                mc.thePlayer.addChatMessage(new ChatComponentText(
+                        "[" + Client.NAME + "] Could not install the item renderer (1.7 block / fake block)."));
+            }
+        }
+    }
+
     public AnimRenderer(Minecraft mc) {
         super(mc);
         this.mc = mc;
@@ -32,12 +63,20 @@ public class AnimRenderer extends ItemRenderer {
         EntityPlayerSP p = mc.thePlayer;
         ItemStack held = p == null ? null : p.getHeldItem();
 
-        boolean custom = FarReach.animations != null
+        boolean realBlock = FarReach.animations != null
                 && FarReach.animations.enabled
                 && (int) Settings.get("Animations", "Style") == 1
                 && held != null
                 && p.getItemInUseCount() > 0
                 && held.getItemUseAction() == EnumAction.BLOCK;
+
+        // Fake autoblock (KillAura): show the block pose without really blocking
+        boolean fakeBlock = held != null
+                && held.getItem() instanceof ItemSword
+                && FarReach.killAura != null
+                && FarReach.killAura.isFakeBlocking();
+
+        boolean custom = realBlock || fakeBlock;
 
         if (!custom) {
             super.renderItemInFirstPerson(partialTicks);

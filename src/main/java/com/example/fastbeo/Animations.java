@@ -108,26 +108,9 @@ public class Animations {
         }
     }
 
-    // Swaps the game's first-person item renderer for ours (it passes everything else through)
+    // The 1.7 style needs our own item renderer
     private void installRenderer() {
-        if (installed || failed || mc.entityRenderer == null) return;
-        try {
-            AnimRenderer renderer = new AnimRenderer(mc);
-            ReflectionHelper.setPrivateValue(EntityRenderer.class, mc.entityRenderer, renderer,
-                    "itemRenderer", "field_78516_c");
-            installed = true;
-            try {
-                // The game keeps a second reference to the same renderer
-                ReflectionHelper.setPrivateValue(Minecraft.class, mc, renderer,
-                        "itemRenderer", "field_175620_Y");
-            } catch (Exception ignored) {
-                // Only matters for a tiny equip animation glitch
-            }
-        } catch (Exception ex) {
-            failed = true;
-            mc.thePlayer.addChatMessage(new ChatComponentText(
-                    "[" + Client.NAME + "] Animations: could not install the 1.7 renderer."));
-        }
+        AnimRenderer.install();
     }
 
     // Rotate around the spot where the item is, instead of around the camera
